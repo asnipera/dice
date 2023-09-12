@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import stats from "./common/stats";
 import { onMounted } from "vue";
+import * as CANNON from "cannon-es";
 
 onMounted(() => {
   const canvas = document.querySelector("#mainCanvas") as HTMLCanvasElement;
@@ -25,11 +26,52 @@ onMounted(() => {
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.zoomSpeed = 0.3;
+
+  /**
+   * Physics
+   */
+  const world = new CANNON.World();
+  world.gravity.set(0, -9.82, 0);
+
+  const defaultMaterial = new CANNON.Material("default");
+  const defaultContactMaterial = new CANNON.ContactMaterial(
+    defaultMaterial,
+    defaultMaterial,
+    {
+      friction: 0.8,
+      restitution: 0.7,
+    }
+  );
+  world.addContactMaterial(defaultContactMaterial);
+  // const sphereShape = new CANNON.Sphere(1);
+  const size = 1;
+  const halfExtents = new CANNON.Vec3(size, size, size);
+  const boxShape = new CANNON.Box(halfExtents);
+  const sphereBody = new CANNON.Body({
+    mass: 1,
+    position: new CANNON.Vec3(0, 8, 0),
+    shape: boxShape,
+    material: defaultMaterial,
+  });
+  world.addBody(sphereBody);
+  sphereBody.applyForce(new CANNON.Vec3(100, 0, 0), new CANNON.Vec3(0, 0, 0));
+  // floor
+  const floorShape = new CANNON.Plane();
+  const floorBody = new CANNON.Body({
+    type: CANNON.Body.STATIC,
+    shape: floorShape,
+    material: defaultMaterial,
+  });
+  floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+  world.addBody(floorBody);
+
   const loader = new GLTFLoader();
+  let sphere: THREE.Group<THREE.Object3DEventMap>;
   loader.load(
     "/dice/scene.gltf",
     function (gltf) {
-      gltf.scene.scale.set(0.002, 0.002, 0.002);
+      gltf.scene.position.setY(0.1);
+      sphere = gltf.scene;
       scene.add(gltf.scene);
     },
     undefined,
@@ -70,9 +112,16 @@ onMounted(() => {
   renderer.shadowMap.enabled = true;
 
   // Animations
+  let ended = false;
   const tick = () => {
     stats.begin();
     controls.update();
+
+    world.fixedStep();
+    if (sphere) {
+      sphere.position.copy(sphereBody.position as any);
+      sphere.quaternion.copy(sphereBody.quaternion as any);
+    }
 
     // Render
     renderer.render(scene, camera);
