@@ -1,0 +1,11 @@
+Model Information:
+* title:	Dice
+* source:	https://sketchfab.com/3d-models/dice-72584626e75740ca87a210d9fb8f80b2
+* author:	GimmeTheGucci (https://sketchfab.com/GimmeTheGucci)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Dice" (https://sketchfab.com/3d-models/dice-72584626e75740ca87a210d9fb8f80b2) by GimmeTheGucci (https://sketchfab.com/GimmeTheGucci) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
