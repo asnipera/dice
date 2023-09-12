@@ -17,6 +17,9 @@ dependencies:
   cannon-es-debugger:
     specifier: ^1.0.0
     version: 1.0.0(cannon-es@0.20.0)(three@0.156.1)(typescript@5.1.6)
+  lil-gui:
+    specifier: ^0.18.2
+    version: 0.18.2
   stats.js:
     specifier: ^0.17.0
     version: 0.17.0
@@ -904,6 +907,10 @@ packages:
   /json-parse-better-errors@1.0.2:
     resolution: {integrity: sha512-mrqyZKfX5EhL7hvqcV6WG1yYjnjeuYDzDhhcAAUrq8Po85NBQBJP+ZDUT75qZQ98IkUoBqdkExkukOU7Ts2wrw==}
     dev: true
+
+  /lil-gui@0.18.2:
+    resolution: {integrity: sha512-DgdrLy3/KGC0PiQLKgOcJMPItP4xY4iWgJ9+91Zaxfr8GCTmMps05QS9w9jW7yspILlbscbquwjOwxmWnSx5Uw==}
+    dev: false
 
   /load-json-file@4.0.0:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}

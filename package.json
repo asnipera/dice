@@ -14,6 +14,7 @@
     "@types/three": "^0.156.0",
     "cannon-es": "^0.20.0",
     "cannon-es-debugger": "^1.0.0",
+    "lil-gui": "^0.18.2",
     "stats.js": "^0.17.0",
     "three": "^0.156.1",
     "vue": "^3.3.4"

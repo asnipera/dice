@@ -6,6 +6,7 @@ import stats from "./common/stats";
 import { onMounted } from "vue";
 import * as CANNON from "cannon-es";
 import CannonDebugger from "cannon-es-debugger";
+import * as dat from "lil-gui";
 
 onMounted(() => {
   const canvas = document.querySelector("#mainCanvas") as HTMLCanvasElement;
@@ -45,20 +46,7 @@ onMounted(() => {
   );
   world.addContactMaterial(defaultContactMaterial);
   // const sphereShape = new CANNON.Sphere(1);
-  const size = 0.5;
-  const halfExtents = new CANNON.Vec3(size, size, size);
-  const boxShape = new CANNON.Box(halfExtents);
-  const sphereBody = new CANNON.Body({
-    mass: 1,
-    position: new CANNON.Vec3(0, 4, 0),
-    shape: boxShape,
-    material: defaultMaterial,
-  });
-  world.addBody(sphereBody);
-  sphereBody.applyForce(
-    new CANNON.Vec3((Math.random() - 1) * 3, 5, (Math.random() - 1) * 3),
-    new CANNON.Vec3((Math.random() - 1) * 3, 5, (Math.random() - 1) * 3)
-  );
+
   // floor
   const floorShape = new CANNON.Plane();
   const floorBody = new CANNON.Body({
@@ -66,6 +54,8 @@ onMounted(() => {
     shape: floorShape,
     material: defaultMaterial,
   });
+  floorBody.shapes;
+  // 设置floorbody的大小
   floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
   world.addBody(floorBody);
 
@@ -74,11 +64,60 @@ onMounted(() => {
   let cannonDebugger: {
     update: () => void;
   };
+
+  function createWorldSpareBody(num: number) {
+    const size = 0.5;
+    const halfExtents = new CANNON.Vec3(size, size, size);
+    const boxShape = new CANNON.Box(halfExtents);
+    const sphereBodys: CANNON.Body[] = [];
+    for (let i = 0; i < num; i++) {
+      const sphereBody = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(i, 4, 2),
+        shape: boxShape,
+        material: defaultMaterial,
+      });
+      world.addBody(sphereBody);
+      sphereBody.applyForce(
+        new CANNON.Vec3(
+          (Math.random() - 1) * (i + 1),
+          5,
+          (Math.random() - 1) * (i + 1)
+        ),
+        new CANNON.Vec3(
+          (Math.random() - 1) * (i + 1),
+          5,
+          (Math.random() - 1) * (i + 1)
+        )
+      );
+      sphereBodys.push(sphereBody);
+    }
+    console.log(sphereBodys);
+
+    return sphereBodys;
+  }
+
+  let sphereBodys = createWorldSpareBody(3);
+
+  function createSpere(
+    num: number,
+    group: THREE.Group<THREE.Object3DEventMap>
+  ) {
+    const spheres = [];
+    for (let index = 0; index < num; index++) {
+      const sp = group.clone();
+      spheres.push(sp);
+      scene.add(sp);
+    }
+    return spheres;
+  }
+  let spheres: THREE.Group<THREE.Object3DEventMap>[] = [];
   loader.load(
     "/dice/scene.gltf",
     function (gltf) {
       sphere = gltf.scene;
-      scene.add(gltf.scene);
+      spheres = createSpere(3, gltf.scene);
+      // scene.add(gltf.scene);
       cannonDebugger = CannonDebugger(scene, world);
     },
     undefined,
@@ -86,9 +125,25 @@ onMounted(() => {
       console.error(error);
     }
   );
+
+  // Gui
+  const gui = new dat.GUI();
+  const guiObj = {
+    start() {
+      // 清空场景中的child
+      for (let index = 0; index < spheres.length; index++) {
+        const sphere = spheres[index];
+        scene.remove(sphere);
+      }
+      sphereBodys = createWorldSpareBody(3);
+      spheres = createSpere(3, sphere);
+    },
+  };
+
+  gui.add(guiObj, "start").name("重新开始");
   const material = new THREE.MeshStandardMaterial();
   // plane
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), material);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(22, 22), material);
   plane.rotateX(-Math.PI / 2);
   plane.receiveShadow = true;
   scene.add(plane);
@@ -123,11 +178,15 @@ onMounted(() => {
   const tick = () => {
     stats.begin();
     controls.update();
-    cannonDebugger?.update();
+    // cannonDebugger?.update();
     world.fixedStep();
-    if (sphere) {
-      sphere.position.copy(sphereBody.position as any);
-      sphere.quaternion.copy(sphereBody.quaternion as any);
+    if (spheres.length && sphereBodys.length) {
+      for (let index = 0; index < 3; index++) {
+        const sphere = spheres[index];
+        const sphereBody = sphereBodys[index];
+        sphere.position.copy(sphereBody.position as any);
+        sphere.quaternion.copy(sphereBody.quaternion as any);
+      }
     }
 
     // Render
