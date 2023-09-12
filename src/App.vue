@@ -73,7 +73,7 @@ onMounted(() => {
     for (let i = 0; i < num; i++) {
       const sphereBody = new CANNON.Body({
         mass: 1,
-        position: new CANNON.Vec3(i, 4, 2),
+        position: new CANNON.Vec3(i * 1.5, 4, 2),
         shape: boxShape,
         material: defaultMaterial,
       });
@@ -126,21 +126,6 @@ onMounted(() => {
     }
   );
 
-  // Gui
-  const gui = new dat.GUI();
-  const guiObj = {
-    start() {
-      // 清空场景中的child
-      for (let index = 0; index < spheres.length; index++) {
-        const sphere = spheres[index];
-        scene.remove(sphere);
-      }
-      sphereBodys = createWorldSpareBody(3);
-      spheres = createSpere(3, sphere);
-    },
-  };
-
-  gui.add(guiObj, "start").name("重新开始");
   const material = new THREE.MeshStandardMaterial();
   // plane
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(22, 22), material);
@@ -173,8 +158,23 @@ onMounted(() => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
 
+  // Gui
+  const gui = new dat.GUI();
+  const guiObj = {
+    start() {
+      // 清空场景中的child
+      for (let index = 0; index < spheres.length; index++) {
+        const sphere = spheres[index];
+        scene.remove(sphere);
+      }
+      sphereBodys = createWorldSpareBody(3);
+      spheres = createSpere(3, sphere);
+    },
+  };
+
+  gui.add(guiObj, "start").name("重新开始");
+
   // Animations
-  let ended = false;
   const tick = () => {
     stats.begin();
     controls.update();
