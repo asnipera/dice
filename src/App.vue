@@ -5,6 +5,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import stats from "./common/stats";
 import { onMounted } from "vue";
 import * as CANNON from "cannon-es";
+import CannonDebugger from "cannon-es-debugger";
 
 onMounted(() => {
   const canvas = document.querySelector("#mainCanvas") as HTMLCanvasElement;
@@ -44,17 +45,20 @@ onMounted(() => {
   );
   world.addContactMaterial(defaultContactMaterial);
   // const sphereShape = new CANNON.Sphere(1);
-  const size = 1;
+  const size = 0.5;
   const halfExtents = new CANNON.Vec3(size, size, size);
   const boxShape = new CANNON.Box(halfExtents);
   const sphereBody = new CANNON.Body({
     mass: 1,
-    position: new CANNON.Vec3(0, 8, 0),
+    position: new CANNON.Vec3(0, 4, 0),
     shape: boxShape,
     material: defaultMaterial,
   });
   world.addBody(sphereBody);
-  sphereBody.applyForce(new CANNON.Vec3(100, 0, 0), new CANNON.Vec3(0, 0, 0));
+  sphereBody.applyForce(
+    new CANNON.Vec3((Math.random() - 1) * 3, 5, (Math.random() - 1) * 3),
+    new CANNON.Vec3((Math.random() - 1) * 3, 5, (Math.random() - 1) * 3)
+  );
   // floor
   const floorShape = new CANNON.Plane();
   const floorBody = new CANNON.Body({
@@ -67,12 +71,15 @@ onMounted(() => {
 
   const loader = new GLTFLoader();
   let sphere: THREE.Group<THREE.Object3DEventMap>;
+  let cannonDebugger: {
+    update: () => void;
+  };
   loader.load(
     "/dice/scene.gltf",
     function (gltf) {
-      gltf.scene.position.setY(0.1);
       sphere = gltf.scene;
       scene.add(gltf.scene);
+      cannonDebugger = CannonDebugger(scene, world);
     },
     undefined,
     function (error) {
@@ -105,7 +112,7 @@ onMounted(() => {
   // Renderer
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    // antialias: true,
+    antialias: true,
   });
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -116,7 +123,7 @@ onMounted(() => {
   const tick = () => {
     stats.begin();
     controls.update();
-
+    cannonDebugger?.update();
     world.fixedStep();
     if (sphere) {
       sphere.position.copy(sphereBody.position as any);
