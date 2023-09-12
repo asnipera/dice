@@ -113,7 +113,7 @@ onMounted(() => {
   }
   let spheres: THREE.Group<THREE.Object3DEventMap>[] = [];
   loader.load(
-    "/dice/scene.gltf",
+    "./dice/scene.gltf",
     function (gltf) {
       sphere = gltf.scene;
       spheres = createSpere(3, gltf.scene);
